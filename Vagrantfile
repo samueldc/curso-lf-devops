@@ -69,9 +69,9 @@ Vagrant.configure("2") do |config|
   # SHELL
 
   config.vm.define "control" do |control|
-    controle.vm.box = "geerlingguy/debian9"
-    controle.vm.network "private_network", ip: "177.17.177.100"
-    controle.vm.hostname = "control"
+    control.vm.box = "geerlingguy/debian9"
+    control.vm.network "private_network", ip: "177.17.177.100"
+    control.vm.hostname = "control"
   end
 
 end

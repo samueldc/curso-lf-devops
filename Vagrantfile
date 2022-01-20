@@ -70,8 +70,16 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "control" do |control|
     control.vm.box = "geerlingguy/debian9"
-    control.vm.network "private_network", ip: "177.17.177.100"
+    control.vm.network "private_network", ip: "172.17.177.100"
     control.vm.hostname = "control"
+    control.vm.provider "virtualbox" do |vb|
+      vb.name = "curso-devops-control"
+      vb.memory = "2048"
+      vb.cpus = 1
+      vb.gui = false
+    end
+    # control.vm.provision "shell", inline: "apt-get update && apt-get install vim -y"
+    control.vm.provision "shell", path: "provision/update.sh"
   end
 
 end

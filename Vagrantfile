@@ -68,18 +68,100 @@ Vagrant.configure("2") do |config|
   #   apt-get install -y apache2
   # SHELL
 
-  config.vm.define "control" do |control|
-    control.vm.box = "geerlingguy/debian9"
-    control.vm.network "private_network", ip: "172.17.177.100"
-    control.vm.hostname = "control"
-    control.vm.provider "virtualbox" do |vb|
+  config.vm.define "control" do |machine|
+    machine.vm.box = "geerlingguy/debian9"
+    machine.vm.network "private_network", ip: "172.17.177.100"
+    machine.vm.hostname = "control"
+    machine.vm.provider "virtualbox" do |vb|
       vb.name = "curso-devops-control"
       vb.memory = "2048"
       vb.cpus = 1
       vb.gui = false
     end
     # control.vm.provision "shell", inline: "apt-get update && apt-get install vim -y"
-    control.vm.provision "shell", path: "provision/update.sh"
+    machine.vm.provision "shell", path: "provision/update.sh"
+    # control.vm.synced_folder ".", "/vagrant", disabled: true
+    machine.vm.synced_folder "./configs", "/var/configs", owner: "root", group: "root"
   end
+
+  config.vm.define "web" do |machine|
+    machine.vm.box = "geerlingguy/debian9"
+    machine.vm.network "private_network", ip: "172.17.177.101"
+    machine.vm.hostname = "web"
+    machine.vm.provider "virtualbox" do |vb|
+      vb.name = "curso-devops-web"
+      vb.memory = "512"
+      vb.cpus = 1
+      vb.gui = false
+    end
+    machine.vm.provision "shell", path: "provision/update.sh"
+    machine.vm.synced_folder "./configs", "/var/configs", owner: "root", group: "root"
+  end
+
+  config.vm.define "db" do |machine|
+    machine.vm.box = "geerlingguy/debian9"
+    machine.vm.network "private_network", ip: "172.17.177.102"
+    machine.vm.hostname = "db"
+    machine.vm.provider "virtualbox" do |vb|
+      vb.name = "curso-devops-db"
+      vb.memory = "512"
+      vb.cpus = 1
+      vb.gui = false
+    end
+    machine.vm.provision "shell", path: "provision/update.sh"
+    machine.vm.synced_folder "./configs", "/var/configs", owner: "root", group: "root"
+  end
+
+  config.vm.define "master" do |machine|
+    machine.vm.box = "geerlingguy/centos7"
+    machine.vm.network "private_network", ip: "172.17.177.110"
+    machine.vm.hostname = "master"
+    machine.vm.provider "virtualbox" do |vb|
+      vb.name = "curso-devops-master"
+      vb.memory = "1024"
+      vb.cpus = 1
+      vb.gui = false
+    end
+    machine.vm.synced_folder "./configs", "/var/configs", owner: "root", group: "root"
+  end
+
+  config.group.groups = {
+    "control" => [
+      "control",
+    ],
+    "clients" => [
+      "web",
+      "db",
+    ],
+    "nodes" => []
+  }
+
+  (1..3).each do |i|
+    config.vm.define "node#{i}" do |machine|
+      machine.vm.box = "geerlingguy/centos7"
+      machine.vm.network "private_network", ip: "172.17.177.11#{i}"
+      machine.vm.hostname = "node#{i}"
+      machine.vm.provider "virtualbox" do |vb|
+        vb.name = "curso-devops-node#{i}"
+        vb.memory = "512"
+        vb.cpus = 1
+        vb.gui = false
+      end
+    end
+    config.group.groups["nodes"] << "node#{i}"
+  end
+
+#  config.group.groups = {
+#    "control" => [
+#      "control",
+#    ],
+#    "clients" => [
+#      "web",
+#      "db",
+#    ],
+#    "nodes" => [
+#      "node1", "node2", "node3"
+#    ]
+#  }
 
 end

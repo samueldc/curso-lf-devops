@@ -80,6 +80,7 @@ Vagrant.configure("2") do |config|
     end
     # control.vm.provision "shell", inline: "apt-get update && apt-get install vim -y"
     machine.vm.provision "shell", path: "provision/update.sh"
+    machine.vm.provision "shell", inline: "apt-get update && apt-get install python3 python3-pip -y && LANG=en_US.utf8 LC_ALL=en_US.utf8 pip3 install -q ansible"
     # control.vm.synced_folder ".", "/vagrant", disabled: true
     machine.vm.synced_folder "./configs", "/var/configs", owner: "root", group: "root"
   end

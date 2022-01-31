@@ -80,6 +80,8 @@ Vagrant.configure("2") do |config|
     end
     # control.vm.provision "shell", inline: "apt-get update && apt-get install vim -y"
     # machine.vm.provision "file", source: "./hosts", destination: "~"
+    machine.vm.provision "shell", inline: "[ ! -f 'home/vagrant/.ssh/id_rsa' ] && ssh-keygen -q -f ~/.ssh/id_rsa -N ''"
+    machine.vm.provision "shell", inline: "cp /home/vagrant/.ssh/id_rsa.pub /vagrant/"
     machine.vm.provision "shell", inline: "sudo mkdir -p /etc/ansible/ && sudo cp /vagrant/hosts /etc/ansible/"
     # machine.vm.provision "shell", path: "provision/update.sh"
     machine.vm.provision "shell", inline: "apt-get update && apt-get install python3 python3-pip -y && LANG=en_US.utf8 LC_ALL=en_US.utf8 pip3 install -q ansible"

@@ -100,6 +100,8 @@ Vagrant.configure("2") do |config|
       vb.gui = false
     end
     machine.vm.provision "shell", path: "provision/update.sh"
+    machine.vm.provision "shell", inline: "[ ! -f '/home/vagrant/.ssh/id_rsa_control.pub' ] && cat /vagrant/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys"
+    machine.vm.provision "file", source: "id_rsa.pub", destination: "/home/vagrant/.ssh/id_rsa_control.pub"
     machine.vm.synced_folder "./configs", "/var/configs", owner: "root", group: "root"
   end
 

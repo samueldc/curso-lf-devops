@@ -1,0 +1,22 @@
+---
+- hosts: web
+  become: yes
+  tasks:
+  - name: Packages installation
+    apt:
+      pkg:
+      - php7.0
+      - php-pear
+      - php7.0-curl
+      - php7.0-gd
+      - php7.0-intl
+      - php7.0-xmlrpc
+      - php7.0-mysql
+      - apache2
+      - python-mysqldb
+      - wget
+      - zip
+      - curl
+      - vim
+      state: present
+      update_cache: yes

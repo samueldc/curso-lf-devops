@@ -12,3 +12,43 @@
       - python-mysqldb
       state: present
       update_cache: yes
+  - name: Download database structure sql
+    unarchive:
+      src: https://github.com/rogerramossilva/devops/raw/master/db.zip
+      dest: /tmp
+      remote_src: yes
+  - name: Create database
+    mysql_db:
+      name: backup
+      login_user: root
+      login_password: ""
+      state: present
+  - name: Import database structure sql
+    mysql_db:
+      name: backup
+      login_user: root
+      login_password: ""
+      target: /tmp/backup.sql
+      state: import
+  - name: Create database user
+    mysql_user:
+      login_user: root
+      login_password: ""
+      host: '%'
+      name: express
+      password: 'AllSafe0!'
+      priv: 'backup.*:ALL'
+      state: present
+  - name: Set up ip address
+    replace:
+      path: /etc/mysql/mariadb.conf.d/50-server.cnf
+      regexp: '127\.0\.0\.1'
+      replace: '0.0.0.0'
+    notify: restart mysql
+
+  handlers:
+  - name: restart mysql
+    service:
+      name: mysql
+      state: restarted
+      enabled: yes

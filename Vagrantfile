@@ -68,6 +68,12 @@ Vagrant.configure("2") do |config|
   #   apt-get install -y apache2
   # SHELL
 
+  $script = <<-'SCRIPT'
+  if [ ! -f '/home/vagrant/.ssh/id_rsa' ]; then
+    ssh-keygen -q -f /home/vagrant/.ssh/id_rsa -N ''
+  fi
+  SCRIPT
+  
   config.vm.define "control" do |machine|
     machine.vm.box = "geerlingguy/debian9"
     machine.vm.network "private_network", ip: "172.17.177.100"
@@ -80,11 +86,12 @@ Vagrant.configure("2") do |config|
     end
     # control.vm.provision "shell", inline: "apt-get update && apt-get install vim -y"
     # machine.vm.provision "file", source: "./hosts", destination: "~"
-    machine.vm.provision "shell", inline: "[ ! -f 'home/vagrant/.ssh/id_rsa' ] && ssh-keygen -q -f ~/.ssh/id_rsa -N ''"
+    machine.vm.provision "shell", inline: $script
     machine.vm.provision "shell", inline: "cp /home/vagrant/.ssh/id_rsa.pub /vagrant/"
-    machine.vm.provision "shell", inline: "sudo mkdir -p /etc/ansible/ && sudo cp /vagrant/hosts /etc/ansible/"
     # machine.vm.provision "shell", path: "provision/update.sh"
     machine.vm.provision "shell", inline: "apt-get update && apt-get install python3 python3-pip -y && LANG=en_US.utf8 LC_ALL=en_US.utf8 pip3 install -q ansible"
+    machine.vm.provision "shell", inline: "sudo mkdir -p /etc/ansible/ && sudo cp /vagrant/hosts /etc/ansible/"
+    machine.vm.provision "file", source: "./ansible", destination: "/home/vagrant/"
     # control.vm.synced_folder ".", "/vagrant", disabled: true
     machine.vm.synced_folder "./configs", "/var/configs", owner: "root", group: "root"
   end

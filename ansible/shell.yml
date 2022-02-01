@@ -1,0 +1,6 @@
+---
+- hosts: all
+  tasks:
+  - name: Execution of command using shell module
+    shell: cat /etc/hosts >> /tmp/arquivo.txt
+  become: yes

@@ -1,0 +1,14 @@
+---
+- hosts: db
+  become: yes
+  tasks:
+  - name: Packages installation
+    apt:
+      pkg:
+      - mysql-server
+      - wget
+      - zip
+      - curl
+      - python-mysqldb
+      state: present
+      update_cache: yes

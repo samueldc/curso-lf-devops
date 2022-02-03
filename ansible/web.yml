@@ -1,6 +1,8 @@
 ---
 - hosts: web
   become: yes
+  vars_files:
+  - vars/default.yml
   tasks:
   - name: Packages installation
     apt:
@@ -20,3 +22,61 @@
       - vim
       state: present
       update_cache: yes
+  - name: Webserver directory set upq
+    file:
+      path: /srv/www
+      state: directory
+      owner: "{{ app_user }}"
+      mode: 0755
+  - name: Application download and extration
+    unarchive:
+      src: https://github.com/rogerramossilva/devops/raw/master/express.zip
+      dest: /srv/www
+      remote_src: yes
+      validate_certs: no
+      owner: "{{ app_user }}"
+  - name: Application IP set up
+    replace:
+      path: /srv/www/express/backup.php
+      regexp: '192\.168\.1\.20'
+      replace: 172.17.177.102
+  - name: Apache virtual host conf file creation
+    template:
+      src: files/{{ http_conf }}
+      dest: /etc/apache2/sites-available/{{ http_conf }}
+  - name: Apache dir conf file creation
+    template:
+      src: files/dir{{ http_conf }}
+      dest: /etc/apache2/conf-available/dir{{ http_conf }}
+  - name:
+    template:
+      src: files/hostsweb
+      dest: /etc/hosts
+  - name: Site enabling
+    shell: /usr/sbin/a2ensite {{ http_conf }}
+    notify: restart apache
+  - name: Conf enabling
+    shell: /usr/sbin/a2enconf dir{{ http_conf }}
+    notify: restart apache
+  - name: Virtual host module enabling
+    apache2_module:
+      name: "{{ item }}"
+      state: present
+    loop:
+    - vhost_alias
+    notify: restart apache
+  - name: Apache user permissions
+    file:
+      path: /srv/www/express
+      state: directory
+      recurse: yes
+      owner: "{{ app_user }}"
+      group: "{{ app_user }}"
+
+  handlers:
+  - name: restart apache
+    service: 
+      name: apache2
+      state: restarted
+      enabled: yes
+

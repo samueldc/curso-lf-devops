@@ -123,6 +123,8 @@ Vagrant.configure("2") do |config|
       vb.gui = false
     end
     machine.vm.provision "shell", path: "provision/update.sh"
+    machine.vm.provision "shell", inline: "[ ! -f '/home/vagrant/.ssh/id_rsa_control.pub' ] && cat /vagrant/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys"
+    machine.vm.provision "file", source: "id_rsa.pub", destination: "/home/vagrant/.ssh/id_rsa_control.pub"
     machine.vm.synced_folder "./configs", "/var/configs", owner: "root", group: "root"
   end
 
@@ -137,6 +139,34 @@ Vagrant.configure("2") do |config|
       vb.gui = false
     end
     machine.vm.synced_folder "./configs", "/var/configs", owner: "root", group: "root"
+  end
+
+  config.vm.define "pupmaster" do |machine|
+    machine.vm.box = "geerlingguy/centos7"
+    machine.vm.network "private_network", ip: "172.17.177.105"
+    machine.vm.hostname = "pupmaster"
+    machine.vm.provider "virtualbox" do |vb|
+      vb.name = "curso-devops-pupmaster"
+      vb.memory = "2048"
+      vb.cpus = 1
+      vb.gui = false
+    end
+  end
+
+  config.vm.define "pupagent" do |machine|
+    machine.vm.box = "geerlingguy/debian9"
+    machine.vm.network "private_network", ip: "172.17.177.102"
+    machine.vm.hostname = "pupagent"
+    machine.vm.provider "virtualbox" do |vb|
+      vb.name = "curso-devops-pupagent"
+      vb.memory = "512"
+      vb.cpus = 1
+    end
+    machine.vm.provision "shell", inline: "apt-get update && apt-get install puppet -y"
+    machine.vm.provision "puppet" do |puppet|
+      puppet.manifests_path = "puppet/manifests"
+      puppet.manifest_file = "default.pp"
+    end
   end
 
   config.group.groups = {

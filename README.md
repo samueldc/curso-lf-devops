@@ -1,1 +1,1 @@
-# Repositório com exercícios do curso de DevOps da LinuxForce
+Repositório com exercícios do curso de DevOps da LinuxForce

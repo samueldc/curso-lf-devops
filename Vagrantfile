@@ -155,7 +155,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "pupagent" do |machine|
     machine.vm.box = "geerlingguy/debian9"
-    machine.vm.network "private_network", ip: "172.17.177.102"
+    machine.vm.network "private_network", ip: "172.17.177.106"
     machine.vm.hostname = "pupagent"
     machine.vm.provider "virtualbox" do |vb|
       vb.name = "curso-devops-pupagent"

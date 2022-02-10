@@ -1,5 +1,9 @@
 class web {
 
+  Exec {
+    path => '/bin/:/sbin/:/usr/bin/:/usr/sbin/'
+  }
+
   exec { 'apt update':
     command => 'apt-get update',
     path    => ['/usr/bin', '/usr/sbin']
@@ -61,10 +65,54 @@ class web {
   }
 
   exec { 'wget-express.zip':
-    cwd => '/tmp',
+    cwd     => '/tmp',
     command => '/usr/bin/wget --no-check-certificate https://github.com/rogerramossilva/devops/raw/master/express.zip',
     creates => '/tmp/express.zip',
     require => Package['wget'],
+  }
+
+  exec { 'unzip':
+    cwd     => '/tmp',
+    command => '/usr/bin/unzip /tmp/express.zip -d /srv/www/',
+    creates => '/srv/www/express',
+    unless  => 'test -d /srv/www/express/',
+    require => Package['zip'],
+  }
+
+  service { 'apache2':
+    ensure     => running,
+    enable     => true,
+    hasrestart => true,
+    restart    => true,
+    require    => Package['apache2']
+  }
+
+  exec { 'a2enconf direxpress':
+    path     => ['/usr/bin', '/usr/sbin'],
+    provider => shell,
+    require  => Package['apache2'],
+    notify   => Service['apache2']
+  }
+
+  exec { 'a2ensite express':
+    path     => ['/usr/bin', '/usr/sbin'],
+    provider => shell,
+    require  => Package['apache2'],
+    notify   => Service['apache2']
+  }
+
+  exec { 'a2enmod vhost_alias':
+    path     => ['/usr/bin', '/usr/sbin'],
+    provider => shell,
+    require  => Package['apache2'],
+    notify   => Service['apache2']
+  }
+
+  exec { 'a2enmod php7.0':
+    path     => ['/usr/bin', '/usr/sbin'],
+    provider => shell,
+    require  => Package['apache2'],
+    notify   => Service['apache2']
   }
 
 }
